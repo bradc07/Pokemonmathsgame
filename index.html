@@ -988,8 +988,8 @@
 
         // Set background based on level type
         const bgMap = {
-            forest: 'linear-gradient(to bottom, #4a7c59, #2d5016)',
-            cave: 'linear-gradient(to bottom, #4a4a4a, #2a2a2a)',
+            forest: 'url(pewtercitybackground.jpg)',
+            cave: 'url(pewtercitybackground.jpg)',
             water: 'linear-gradient(to bottom, #4fc3f7, #0288d1)',
             bridge: 'linear-gradient(to bottom, #8b7355, #5d4a37)',
             field: 'linear-gradient(to bottom, #7cb342, #558b2f)',
@@ -997,7 +997,7 @@
             gym_water: 'linear-gradient(to bottom, #1e3a8a, #1e40af)'
         };
         const bg = document.getElementById('battle-scene-bg');
-        bg.style.background = bgMap[lvl.bg] || bgMap.forest;
+        bg.style.background = bgMap[lvl.bg] || 'url(pewtercitybackground.jpg)';
         bg.style.backgroundSize = 'cover';
         bg.style.backgroundPosition = 'center';
 
