@@ -969,6 +969,10 @@
         "77": { name: "Ponyta", type: "Fire", color: "bg-fire", ht: "3'03\"", wt: "66.1 lbs", desc: "Its hooves are 10 times harder than diamond. It can trample anything completely flat in little time.", moves: [{n: "Stomp", d: 20}, {n: "Flame Tail", d: 30}], hp: 60, weak: "orb-water", resist: "orb-none", retreat: 1 },
         "133": { name: "Eevee", type: "Normal", color: "bg-normal", ht: "1'00\"", wt: "14.3 lbs", desc: "Its genetic code is irregular. It may mutate if it is exposed to radiation from element stones.", moves: [{n: "Tail Whip", d: 0}, {n: "Quick Attack", d: 20}], hp: 50, weak: "orb-fight", resist: "orb-none", retreat: 1 },
         "143": { name: "Snorlax", type: "Normal", color: "bg-normal", ht: "6'11\"", wt: "1014.1 lbs", desc: "Very lazy. Just eats and sleeps. As its rotund bulk builds, it becomes steadily more slothful.", moves: [{n: "Body Slam", d: 80}, {n: "Rest", d: 0}], hp: 120, weak: "orb-fight", resist: "orb-none", retreat: 4 },
+        "26": { name: "Raichu", type: "Electric", color: "bg-electric", ht: "2'07\"", wt: "66.1 lbs", desc: "Its long tail serves as a ground to protect itself from its own high voltage power.", moves: [{n: "Thunder Shock", d: 40}, {n: "Thunder", d: 90}], hp: 80, weak: "orb-rock", resist: "orb-fly", retreat: 2 },
+        "45": { name: "Vileplume", type: "Grass/Poison", color: "bg-grass", ht: "3'11\"", wt: "41.0 lbs", desc: "The larger its petals, the more toxic pollen it contains. Its big head is heavy and hard to hold up.", moves: [{n: "Petal Dance", d: 70}, {n: "Solar Beam", d: 120}], hp: 85, weak: "orb-fire", resist: "orb-water", retreat: 2 },
+        "89": { name: "Muk", type: "Poison", color: "bg-normal", ht: "3'11\"", wt: "66.1 lbs", desc: "Thickly covered with a filthy, vile sludge. It is so toxic, even its footprints contain poison.", moves: [{n: "Sludge", d: 50}, {n: "Toxic", d: 0}], hp: 105, weak: "orb-psychic", resist: "orb-grass", retreat: 3 },
+        "149": { name: "Dragonite", type: "Dragon/Flying", color: "bg-normal", ht: "7'03\"", wt: "463.0 lbs", desc: "An extremely rarely seen marine Pokémon. Its intelligence is said to match that of humans.", moves: [{n: "Dragon Rage", d: 100}, {n: "Hyper Beam", d: 150}], hp: 140, weak: "orb-rock", resist: "orb-grass", retreat: 3 },
         // Fallback for others
         "default": { name: "Unknown", type: "???", color: "bg-normal", ht: "--", wt: "--", desc: "Data not yet available.", moves: [{n: "-", d: 0}], hp: 0, weak: "orb-none", resist: "orb-none", retreat: 0 }
     };
@@ -982,12 +986,12 @@
             pathCol: "#d4a373",
             prize: { name: "ONIX", sprite: "95" },
             levels: [
-                { id: 0, name: "Bug Catcher", type: "add", hp: 15, sprite: "10", bg: "forest" }, 
-                { id: 1, name: "Lass Anna", type: "bond", hp: 20, sprite: "16", bg: "forest" }, 
-                { id: 2, name: "Hiker Dave", type: "double", hp: 25, sprite: "74", bg: "cave" }, 
-                { id: 3, name: "Jr Trainer", type: "bridge", hp: 30, sprite: "50", bg: "cave" }, 
+                { id: 0, name: "Bug Catcher", type: "add", hp: 15, sprite: "10", bg: "forest" },
+                { id: 1, name: "Lass Anna", type: "bond", hp: 20, sprite: "16", bg: "forest" },
+                { id: 2, name: "Hiker Dave", type: "double", hp: 25, sprite: "74", bg: "cave" },
+                { id: 3, name: "Jr Trainer", type: "bridge", hp: 30, sprite: "50", bg: "cave" },
                 { id: 4, name: "Rock Rookie", type: "add", hp: 35, sprite: "74", bg: "cave" },
-                { id: 5, name: "LEADER BROCK", type: "missing", hp: 40, sprite: "95", bg: "gym_rock", isBoss: true } 
+                { id: 5, name: "LEADER BROCK", type: "missing", hp: 40, sprite: "95", bg: "gym_rock", isBoss: true }
             ]
         },
         cerulean: {
@@ -998,11 +1002,75 @@
             pathCol: "#0288d1",
             prize: { name: "STARMIE", sprite: "121" },
             levels: [
-                { id: 0, name: "Swimmer", type: "sub_simple", hp: 15, sprite: "41", bg: "water" }, 
-                { id: 1, name: "Rocket Grunt", type: "sub_10", hp: 20, sprite: "19", bg: "bridge" }, 
-                { id: 2, name: "Camper", type: "difference", hp: 25, sprite: "56", bg: "field" }, 
-                { id: 3, name: "Picnicker", type: "sub_bridge", hp: 30, sprite: "120", bg: "water" }, 
-                { id: 4, name: "LEADER MISTY", type: "sub_missing", hp: 50, sprite: "121", bg: "gym_water", isBoss: true } 
+                { id: 0, name: "Swimmer", type: "sub_simple", hp: 15, sprite: "41", bg: "water" },
+                { id: 1, name: "Rocket Grunt", type: "sub_10", hp: 20, sprite: "19", bg: "bridge" },
+                { id: 2, name: "Camper", type: "difference", hp: 25, sprite: "56", bg: "field" },
+                { id: 3, name: "Picnicker", type: "sub_bridge", hp: 30, sprite: "120", bg: "water" },
+                { id: 4, name: "LEADER MISTY", type: "sub_missing", hp: 50, sprite: "121", bg: "gym_water", isBoss: true }
+            ]
+        },
+        vermilion: {
+            name: "Vermilion City",
+            leader: { name: "LT. SURGE", sprite: "trainers/lt-surge.png", type: "Electric", color: "yellow", quote: "Shocking, isn't it?" },
+            bio: { skill: "Multiplication & Times Tables", tip: "Count in groups!" },
+            bg: "#fef08a",
+            pathCol: "#facc15",
+            prize: { name: "RAICHU", sprite: "26" },
+            levels: [
+                { id: 0, name: "Sailor", type: "mult_2", hp: 20, sprite: "81", bg: "field" },
+                { id: 1, name: "Gentleman", type: "mult_5", hp: 25, sprite: "100", bg: "field" },
+                { id: 2, name: "Engineer", type: "mult_10", hp: 30, sprite: "82", bg: "bridge" },
+                { id: 3, name: "Rocker", type: "mult_3", hp: 35, sprite: "25", bg: "field" },
+                { id: 4, name: "Guitarist", type: "mult_4", hp: 40, sprite: "125", bg: "field" },
+                { id: 5, name: "LT. SURGE", type: "mult_mixed", hp: 60, sprite: "26", bg: "gym_electric", isBoss: true }
+            ]
+        },
+        celadon: {
+            name: "Celadon City",
+            leader: { name: "ERIKA", sprite: "trainers/erika.png", type: "Grass", color: "green", quote: "Nature always finds a way!" },
+            bio: { skill: "Division & Sharing", tip: "Split into equal groups!" },
+            bg: "#86efac",
+            pathCol: "#4ade80",
+            prize: { name: "VILEPLUME", sprite: "45" },
+            levels: [
+                { id: 0, name: "Lass", type: "div_2", hp: 25, sprite: "43", bg: "field" },
+                { id: 1, name: "Beauty", type: "div_5", hp: 30, sprite: "69", bg: "forest" },
+                { id: 2, name: "Twins", type: "div_10", hp: 35, sprite: "102", bg: "forest" },
+                { id: 3, name: "Picnicker", type: "div_3", hp: 40, sprite: "44", bg: "field" },
+                { id: 4, name: "Cool Trainer", type: "div_4", hp: 45, sprite: "114", bg: "forest" },
+                { id: 5, name: "LEADER ERIKA", type: "div_mixed", hp: 70, sprite: "45", bg: "gym_grass", isBoss: true }
+            ]
+        },
+        fuchsia: {
+            name: "Fuchsia City",
+            leader: { name: "KOGA", sprite: "trainers/koga.png", type: "Poison", color: "purple", quote: "Prepare to be poisoned by my tricks!" },
+            bio: { skill: "Mixed Operations & Problem Solving", tip: "Use all your skills!" },
+            bg: "#c084fc",
+            pathCol: "#a855f7",
+            prize: { name: "MUK", sprite: "89" },
+            levels: [
+                { id: 0, name: "Juggler", type: "mixed_add_sub", hp: 30, sprite: "88", bg: "field" },
+                { id: 1, name: "Tamer", type: "mixed_mult_div", hp: 35, sprite: "109", bg: "bridge" },
+                { id: 2, name: "Bird Keeper", type: "word_problem", hp: 40, sprite: "42", bg: "field" },
+                { id: 3, name: "Ninja", type: "sequence", hp: 45, sprite: "110", bg: "bridge" },
+                { id: 4, name: "Blackbelt", type: "comparison", hp: 50, sprite: "89", bg: "bridge" },
+                { id: 5, name: "LEADER KOGA", type: "mixed_all", hp: 80, sprite: "89", bg: "gym_poison", isBoss: true }
+            ]
+        },
+        indigo: {
+            name: "Indigo Plateau",
+            leader: { name: "CHAMPION", sprite: "trainers/champion.png", type: "Champion", color: "red", quote: "You've come far, but this is the ultimate test!" },
+            bio: { skill: "Master Level - All Skills", tip: "Prove you're a true champion!" },
+            bg: "#fee2e2",
+            pathCol: "#fca5a5",
+            prize: { name: "DRAGONITE", sprite: "149" },
+            levels: [
+                { id: 0, name: "Elite Lorelei", type: "add", hp: 40, sprite: "87", bg: "elite" },
+                { id: 1, name: "Elite Bruno", type: "mult_mixed", hp: 50, sprite: "68", bg: "elite" },
+                { id: 2, name: "Elite Agatha", type: "sub_missing", hp: 60, sprite: "94", bg: "elite" },
+                { id: 3, name: "Elite Lance", type: "div_mixed", hp: 70, sprite: "148", bg: "elite" },
+                { id: 4, name: "Rival", type: "mixed_all", hp: 80, sprite: "65", bg: "elite" },
+                { id: 5, name: "CHAMPION", type: "champion", hp: 100, sprite: "149", bg: "champion", isBoss: true }
             ]
         }
     };
@@ -1186,25 +1254,69 @@
     }
 
     function updateWorldMap() {
+        // Unlock Cerulean (town2)
         const cerulean = document.getElementById('node-town2');
-        const lock = document.getElementById('lock-town2');
-        const img = document.getElementById('img-town2');
-
-        if (state.maxRegion >= 1 && cerulean && lock && img) {
+        const lockCerulean = document.getElementById('lock-town2');
+        const imgCerulean = document.getElementById('img-town2');
+        if (state.maxRegion >= 1 && cerulean && lockCerulean && imgCerulean) {
             cerulean.classList.remove('town-locked');
-            lock.classList.add('hidden');
-            img.classList.remove('opacity-50');
+            lockCerulean.classList.add('hidden');
+            imgCerulean.classList.remove('opacity-50');
+        }
+
+        // Unlock Vermilion (town3)
+        const vermilion = document.getElementById('node-town3');
+        const lockVermilion = document.getElementById('lock-town3');
+        if (state.maxRegion >= 2 && vermilion && lockVermilion) {
+            vermilion.classList.remove('town-locked');
+            lockVermilion.classList.add('hidden');
+        }
+
+        // Unlock Celadon (town4)
+        const celadon = document.getElementById('node-town4');
+        const lockCeladon = document.getElementById('lock-town4');
+        if (state.maxRegion >= 3 && celadon && lockCeladon) {
+            celadon.classList.remove('town-locked');
+            lockCeladon.classList.add('hidden');
+        }
+
+        // Unlock Fuchsia (town5)
+        const fuchsia = document.getElementById('node-town5');
+        const lockFuchsia = document.getElementById('lock-town5');
+        if (state.maxRegion >= 4 && fuchsia && lockFuchsia) {
+            fuchsia.classList.remove('town-locked');
+            lockFuchsia.classList.add('hidden');
+        }
+
+        // Unlock Indigo Plateau (town6)
+        const indigo = document.getElementById('node-town6');
+        const lockIndigo = document.getElementById('lock-town6');
+        if (state.maxRegion >= 5 && indigo && lockIndigo) {
+            indigo.classList.remove('town-locked');
+            lockIndigo.classList.add('hidden');
         }
     }
 
     function selectRegion(id) {
-        if (id === 'cerulean' && state.maxRegion < 1) {
-            playTone(150, 'sawtooth', 0.2); 
+        // Check prerequisites for each region
+        const prerequisites = {
+            'pewter': 0,
+            'cerulean': 1,
+            'vermilion': 2,
+            'celadon': 3,
+            'fuchsia': 4,
+            'indigo': 5
+        };
+
+        const required = prerequisites[id] || 0;
+        if (state.maxRegion < required) {
+            playTone(150, 'sawtooth', 0.2);
             return;
         }
+
         sfx.click();
         state.regionId = id;
-        state.unlocked = 0; 
+        state.unlocked = 0;
         renderHub();
         switchView('view-hub');
     }
@@ -1305,7 +1417,12 @@
             bridge: 'linear-gradient(to bottom, #8b7355, #5d4a37)',
             field: 'linear-gradient(to bottom, #7cb342, #558b2f)',
             gym_rock: 'url(pewtergymboss.jpg)',
-            gym_water: 'linear-gradient(to bottom, #1e3a8a, #1e40af)'
+            gym_water: 'linear-gradient(to bottom, #1e3a8a, #1e40af)',
+            gym_electric: 'linear-gradient(to bottom, #fef08a, #eab308)',
+            gym_grass: 'linear-gradient(to bottom, #86efac, #22c55e)',
+            gym_poison: 'linear-gradient(to bottom, #c084fc, #9333ea)',
+            elite: 'linear-gradient(to bottom, #1e293b, #0f172a)',
+            champion: 'radial-gradient(circle, #ffd700, #b8860b, #1e293b)'
         };
         const bg = document.getElementById('battle-scene-bg');
         bg.style.background = bgMap[lvl.bg] || 'url(pewtercitybackground.jpg)';
@@ -1366,6 +1483,63 @@
                     break;
                 case 'sub_missing':
                     q = generateSubMissing();
+                    break;
+                case 'mult_2':
+                    q = generateMult2();
+                    break;
+                case 'mult_5':
+                    q = generateMult5();
+                    break;
+                case 'mult_10':
+                    q = generateMult10();
+                    break;
+                case 'mult_3':
+                    q = generateMult3();
+                    break;
+                case 'mult_4':
+                    q = generateMult4();
+                    break;
+                case 'mult_mixed':
+                    q = generateMultMixed();
+                    break;
+                case 'div_2':
+                    q = generateDiv2();
+                    break;
+                case 'div_5':
+                    q = generateDiv5();
+                    break;
+                case 'div_10':
+                    q = generateDiv10();
+                    break;
+                case 'div_3':
+                    q = generateDiv3();
+                    break;
+                case 'div_4':
+                    q = generateDiv4();
+                    break;
+                case 'div_mixed':
+                    q = generateDivMixed();
+                    break;
+                case 'mixed_add_sub':
+                    q = generateMixedAddSub();
+                    break;
+                case 'mixed_mult_div':
+                    q = generateMixedMultDiv();
+                    break;
+                case 'word_problem':
+                    q = generateWordProblem();
+                    break;
+                case 'sequence':
+                    q = generateSequence();
+                    break;
+                case 'comparison':
+                    q = generateComparison();
+                    break;
+                case 'mixed_all':
+                    q = generateMixedAll();
+                    break;
+                case 'champion':
+                    q = generateChampion();
                     break;
                 default:
                     q = generateAddition();
@@ -1565,6 +1739,239 @@
             hint: `Find the missing number!`,
             visual: { type: 'dots-subtract', total: a, remove: b }
         };
+    }
+
+    // --- MULTIPLICATION GENERATORS ---
+
+    function generateMult2() {
+        const a = Math.floor(Math.random() * 10) + 1; // 1-10
+        const answer = a * 2;
+        return {
+            question: `${a} × 2 = ?`,
+            answer: answer,
+            options: generateOptions(answer, 2, 20),
+            hint: `Count by 2s!`,
+            visual: { type: 'dots-two-groups', a: 2, b: 2 }
+        };
+    }
+
+    function generateMult5() {
+        const a = Math.floor(Math.random() * 10) + 1; // 1-10
+        const answer = a * 5;
+        return {
+            question: `${a} × 5 = ?`,
+            answer: answer,
+            options: generateOptions(answer, 5, 50),
+            hint: `Count by 5s!`,
+            visual: { type: 'dots-two-groups', a: 5, b: 5 }
+        };
+    }
+
+    function generateMult10() {
+        const a = Math.floor(Math.random() * 10) + 1; // 1-10
+        const answer = a * 10;
+        return {
+            question: `${a} × 10 = ?`,
+            answer: answer,
+            options: generateOptions(answer, 10, 100),
+            hint: `Add a zero!`,
+            visual: { type: 'dots-two-groups', a: 10, b: 10 }
+        };
+    }
+
+    function generateMult3() {
+        const a = Math.floor(Math.random() * 10) + 1; // 1-10
+        const answer = a * 3;
+        return {
+            question: `${a} × 3 = ?`,
+            answer: answer,
+            options: generateOptions(answer, 3, 30),
+            hint: `Count by 3s!`,
+            visual: { type: 'dots-two-groups', a: 3, b: 3 }
+        };
+    }
+
+    function generateMult4() {
+        const a = Math.floor(Math.random() * 10) + 1; // 1-10
+        const answer = a * 4;
+        return {
+            question: `${a} × 4 = ?`,
+            answer: answer,
+            options: generateOptions(answer, 4, 40),
+            hint: `Double and double again!`,
+            visual: { type: 'dots-two-groups', a: 4, b: 4 }
+        };
+    }
+
+    function generateMultMixed() {
+        const multipliers = [2, 3, 4, 5, 10];
+        const mult = multipliers[Math.floor(Math.random() * multipliers.length)];
+        const a = Math.floor(Math.random() * 10) + 1;
+        const answer = a * mult;
+        return {
+            question: `${a} × ${mult} = ?`,
+            answer: answer,
+            options: generateOptions(answer, mult, a * 12),
+            hint: `What is ${a} times ${mult}?`,
+            visual: { type: 'dots-two-groups', a: mult, b: mult }
+        };
+    }
+
+    // --- DIVISION GENERATORS ---
+
+    function generateDiv2() {
+        const answer = Math.floor(Math.random() * 10) + 1; // 1-10
+        const a = answer * 2;
+        return {
+            question: `${a} ÷ 2 = ?`,
+            answer: answer,
+            options: generateOptions(answer, 1, a),
+            hint: `Split into 2 equal groups!`,
+            visual: { type: 'dots-two-groups', a: answer, b: answer }
+        };
+    }
+
+    function generateDiv5() {
+        const answer = Math.floor(Math.random() * 10) + 1; // 1-10
+        const a = answer * 5;
+        return {
+            question: `${a} ÷ 5 = ?`,
+            answer: answer,
+            options: generateOptions(answer, 1, a),
+            hint: `How many 5s make ${a}?`,
+            visual: { type: 'dots-two-groups', a: 5, b: 5 }
+        };
+    }
+
+    function generateDiv10() {
+        const answer = Math.floor(Math.random() * 10) + 1; // 1-10
+        const a = answer * 10;
+        return {
+            question: `${a} ÷ 10 = ?`,
+            answer: answer,
+            options: generateOptions(answer, 1, a),
+            hint: `Remove a zero!`,
+            visual: { type: 'dots-two-groups', a: 10, b: 10 }
+        };
+    }
+
+    function generateDiv3() {
+        const answer = Math.floor(Math.random() * 10) + 1; // 1-10
+        const a = answer * 3;
+        return {
+            question: `${a} ÷ 3 = ?`,
+            answer: answer,
+            options: generateOptions(answer, 1, a),
+            hint: `Split into 3 equal groups!`,
+            visual: { type: 'dots-two-groups', a: 3, b: 3 }
+        };
+    }
+
+    function generateDiv4() {
+        const answer = Math.floor(Math.random() * 10) + 1; // 1-10
+        const a = answer * 4;
+        return {
+            question: `${a} ÷ 4 = ?`,
+            answer: answer,
+            options: generateOptions(answer, 1, a),
+            hint: `Split into 4 equal groups!`,
+            visual: { type: 'dots-two-groups', a: 4, b: 4 }
+        };
+    }
+
+    function generateDivMixed() {
+        const divisors = [2, 3, 4, 5, 10];
+        const div = divisors[Math.floor(Math.random() * divisors.length)];
+        const answer = Math.floor(Math.random() * 10) + 1;
+        const a = answer * div;
+        return {
+            question: `${a} ÷ ${div} = ?`,
+            answer: answer,
+            options: generateOptions(answer, 1, a),
+            hint: `How many ${div}s make ${a}?`,
+            visual: { type: 'dots-two-groups', a: div, b: div }
+        };
+    }
+
+    // --- MIXED OPERATIONS GENERATORS ---
+
+    function generateMixedAddSub() {
+        const op = Math.random() < 0.5 ? 'add' : 'sub';
+        return op === 'add' ? generateAddition() : generateSubtraction();
+    }
+
+    function generateMixedMultDiv() {
+        const op = Math.random() < 0.5 ? 'mult' : 'div';
+        return op === 'mult' ? generateMultMixed() : generateDivMixed();
+    }
+
+    function generateWordProblem() {
+        const problems = [
+            { q: "Sam has 5 apples. He gets 3 more. How many total?", a: 8 },
+            { q: "There are 12 birds. 4 fly away. How many left?", a: 8 },
+            { q: "3 boxes have 4 toys each. How many toys total?", a: 12 },
+            { q: "15 candies shared by 3 kids. How many each?", a: 5 }
+        ];
+        const p = problems[Math.floor(Math.random() * problems.length)];
+        return {
+            question: p.q,
+            answer: p.a,
+            options: generateOptions(p.a, 1, 20),
+            hint: `Read carefully!`,
+            visual: { type: 'dots-two-groups', a: 3, b: 3 }
+        };
+    }
+
+    function generateSequence() {
+        const start = Math.floor(Math.random() * 10) + 1;
+        const step = [2, 3, 5][Math.floor(Math.random() * 3)];
+        const answer = start + step * 3; // 4th number
+        return {
+            question: `${start}, ${start + step}, ${start + step * 2}, ?`,
+            answer: answer,
+            options: generateOptions(answer, start, start + step * 5),
+            hint: `What's the pattern?`,
+            visual: { type: 'dots-two-groups', a: step, b: step }
+        };
+    }
+
+    function generateComparison() {
+        const a = Math.floor(Math.random() * 15) + 5;
+        const b = Math.floor(Math.random() * 15) + 5;
+        const bigger = Math.max(a, b);
+        return {
+            question: `Which is bigger: ${a} or ${b}?`,
+            answer: bigger,
+            options: [a, b, a + b, Math.abs(a - b)].filter((v, i, arr) => arr.indexOf(v) === i).slice(0, 4),
+            hint: `Compare the numbers!`,
+            visual: { type: 'dots-compare', a: a, b: b }
+        };
+    }
+
+    function generateMixedAll() {
+        const types = ['add', 'sub_simple', 'mult_mixed', 'div_mixed'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        switch(type) {
+            case 'add': return generateAddition();
+            case 'sub_simple': return generateSubtraction();
+            case 'mult_mixed': return generateMultMixed();
+            case 'div_mixed': return generateDivMixed();
+            default: return generateAddition();
+        }
+    }
+
+    function generateChampion() {
+        // Champion level - hardest questions
+        const types = ['missing', 'sub_missing', 'mult_mixed', 'div_mixed', 'bridge'];
+        const type = types[Math.floor(Math.random() * types.length)];
+        switch(type) {
+            case 'missing': return generateMissingNumber();
+            case 'sub_missing': return generateSubMissing();
+            case 'mult_mixed': return generateMultMixed();
+            case 'div_mixed': return generateDivMixed();
+            case 'bridge': return generateBridgeTen();
+            default: return generateMissingNumber();
+        }
     }
 
     function generateOptions(correctAnswer, min, max) {
@@ -1838,9 +2245,19 @@
 
         // Check if this was a boss battle
         if (lvl.isBoss) {
-            // Unlock next region
-            if (state.regionId === 'pewter' && state.maxRegion < 1) {
-                state.maxRegion = 1;
+            // Unlock next region based on current region
+            const regionUnlockMap = {
+                'pewter': 1,      // Unlock Cerulean
+                'cerulean': 2,    // Unlock Vermilion
+                'vermilion': 3,   // Unlock Celadon
+                'celadon': 4,     // Unlock Fuchsia
+                'fuchsia': 5,     // Unlock Indigo Plateau
+                'indigo': 6       // Champion complete!
+            };
+
+            const unlockValue = regionUnlockMap[state.regionId];
+            if (unlockValue && state.maxRegion < unlockValue) {
+                state.maxRegion = unlockValue;
             }
             saveGame();
             showBoosterPack();
