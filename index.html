@@ -967,4 +967,615 @@
             c.appendChild(node);
         });
     }
+
+    // --- BATTLE SYSTEM ---
+    let currentQuestion = null;
+
+    function initBattle(levelIdx) {
+        sfx.click();
+        state.currentLvl = levelIdx;
+        const r = REGIONS[state.regionId];
+        const lvl = r.levels[levelIdx];
+
+        // Set enemy HP
+        state.maxHp = lvl.hp;
+        state.enemyHp = lvl.hp;
+        state.playerHp = 100;
+
+        // Update UI
+        document.getElementById('enemy-name').innerText = lvl.name;
+        document.getElementById('enemy-sprite').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${lvl.sprite}.png`;
+
+        // Set background based on level type
+        const bgMap = {
+            forest: 'linear-gradient(to bottom, #4a7c59, #2d5016)',
+            cave: 'linear-gradient(to bottom, #4a4a4a, #2a2a2a)',
+            water: 'linear-gradient(to bottom, #4fc3f7, #0288d1)',
+            bridge: 'linear-gradient(to bottom, #8b7355, #5d4a37)',
+            field: 'linear-gradient(to bottom, #7cb342, #558b2f)',
+            gym_rock: 'url(pewtergymboss.jpg)',
+            gym_water: 'linear-gradient(to bottom, #1e3a8a, #1e40af)'
+        };
+        const bg = document.getElementById('battle-scene-bg');
+        bg.style.background = bgMap[lvl.bg] || bgMap.forest;
+        bg.style.backgroundSize = 'cover';
+        bg.style.backgroundPosition = 'center';
+
+        // Add platform colors
+        document.getElementById('plat-enemy').style.background = 'radial-gradient(ellipse, rgba(139,69,19,0.6), transparent)';
+        document.getElementById('plat-player').style.background = 'radial-gradient(ellipse, rgba(34,139,34,0.6), transparent)';
+
+        // Reset HP bars
+        updateHPBars();
+
+        // Hide next button
+        document.getElementById('next-btn').classList.add('hidden');
+
+        switchView('view-battle');
+
+        // Generate first question after a short delay
+        setTimeout(() => generateQuestion(lvl.type), 500);
+    }
+
+    function generateQuestion(type) {
+        currentQuestion = null;
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        let q = null;
+
+        switch(type) {
+            case 'add':
+                q = generateAddition();
+                break;
+            case 'bond':
+                q = generateNumberBond();
+                break;
+            case 'double':
+                q = generateDoubles();
+                break;
+            case 'bridge':
+                q = generateBridgeTen();
+                break;
+            case 'missing':
+                q = generateMissingNumber();
+                break;
+            case 'sub_simple':
+                q = generateSubtraction();
+                break;
+            case 'sub_10':
+                q = generateSubFrom10();
+                break;
+            case 'difference':
+                q = generateDifference();
+                break;
+            case 'sub_bridge':
+                q = generateSubBridge();
+                break;
+            case 'sub_missing':
+                q = generateSubMissing();
+                break;
+            default:
+                q = generateAddition();
+        }
+
+        currentQuestion = q;
+
+        // Display question
+        document.getElementById('question-text').innerText = q.question;
+        document.getElementById('hint-text').innerText = q.hint;
+
+        // Render visual aid
+        renderVisualAid(q.visual);
+
+        // Create answer buttons
+        q.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'h-full bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-black text-2xl rounded-lg shadow-lg transform active:scale-95 transition-all';
+            btn.innerText = opt;
+            btn.onclick = () => checkAnswer(opt);
+            container.appendChild(btn);
+        });
+    }
+
+    // --- QUESTION GENERATORS ---
+
+    function generateAddition() {
+        const a = Math.floor(Math.random() * 9) + 1;
+        const b = Math.floor(Math.random() * 9) + 1;
+        const answer = a + b;
+
+        return {
+            question: `${a} + ${b} = ?`,
+            answer: answer,
+            options: generateOptions(answer, 1, 20),
+            hint: `Count all the dots together!`,
+            visual: { type: 'dots-two-groups', a: a, b: b }
+        };
+    }
+
+    function generateNumberBond() {
+        const total = Math.floor(Math.random() * 6) + 5; // 5-10
+        const part1 = Math.floor(Math.random() * (total - 1)) + 1;
+        const part2 = total - part1;
+
+        return {
+            question: `${part1} + ? = ${total}`,
+            answer: part2,
+            options: generateOptions(part2, 1, total),
+            hint: `How many more to make ${total}?`,
+            visual: { type: 'dots-bond', total: total, filled: part1 }
+        };
+    }
+
+    function generateDoubles() {
+        const a = Math.floor(Math.random() * 6) + 1; // 1-6
+        const answer = a * 2;
+
+        return {
+            question: `${a} + ${a} = ?`,
+            answer: answer,
+            options: generateOptions(answer, 1, 15),
+            hint: `Double ${a}!`,
+            visual: { type: 'dots-two-groups', a: a, b: a }
+        };
+    }
+
+    function generateBridgeTen() {
+        const a = Math.floor(Math.random() * 4) + 6; // 6-9
+        const b = Math.floor(Math.random() * 5) + 2; // 2-6
+        const answer = a + b;
+
+        return {
+            question: `${a} + ${b} = ?`,
+            answer: answer,
+            options: generateOptions(answer, 10, 20),
+            hint: `Make 10 first, then add more!`,
+            visual: { type: 'dots-bridge-ten', a: a, b: b }
+        };
+    }
+
+    function generateMissingNumber() {
+        const a = Math.floor(Math.random() * 7) + 3;
+        const b = Math.floor(Math.random() * 7) + 3;
+        const answer = a + b;
+
+        // Randomly hide either a, b, or answer
+        const hidePos = Math.floor(Math.random() * 3);
+        let question, hiddenValue;
+
+        if (hidePos === 0) {
+            question = `? + ${b} = ${answer}`;
+            hiddenValue = a;
+        } else if (hidePos === 1) {
+            question = `${a} + ? = ${answer}`;
+            hiddenValue = b;
+        } else {
+            question = `${a} + ${b} = ?`;
+            hiddenValue = answer;
+        }
+
+        return {
+            question: question,
+            answer: hiddenValue,
+            options: generateOptions(hiddenValue, 1, 20),
+            hint: `Find the missing number!`,
+            visual: { type: 'dots-two-groups', a: a, b: b }
+        };
+    }
+
+    function generateSubtraction() {
+        const a = Math.floor(Math.random() * 8) + 3; // 3-10
+        const b = Math.floor(Math.random() * (a - 1)) + 1; // 1 to a-1
+        const answer = a - b;
+
+        return {
+            question: `${a} - ${b} = ?`,
+            answer: answer,
+            options: generateOptions(answer, 0, a),
+            hint: `Cross out ${b} dots!`,
+            visual: { type: 'dots-subtract', total: a, remove: b }
+        };
+    }
+
+    function generateSubFrom10() {
+        const b = Math.floor(Math.random() * 7) + 2; // 2-8
+        const answer = 10 - b;
+
+        return {
+            question: `10 - ${b} = ?`,
+            answer: answer,
+            options: generateOptions(answer, 0, 10),
+            hint: `Take away from 10!`,
+            visual: { type: 'dots-subtract', total: 10, remove: b }
+        };
+    }
+
+    function generateDifference() {
+        const a = Math.floor(Math.random() * 8) + 5; // 5-12
+        const b = Math.floor(Math.random() * (a - 2)) + 1;
+        const answer = a - b;
+
+        return {
+            question: `What's the difference between ${a} and ${b}?`,
+            answer: answer,
+            options: generateOptions(answer, 1, a),
+            hint: `Compare the groups!`,
+            visual: { type: 'dots-compare', a: a, b: b }
+        };
+    }
+
+    function generateSubBridge() {
+        const a = Math.floor(Math.random() * 5) + 11; // 11-15
+        const b = Math.floor(Math.random() * 5) + 2; // 2-6
+        const answer = a - b;
+
+        return {
+            question: `${a} - ${b} = ?`,
+            answer: answer,
+            options: generateOptions(answer, 5, 14),
+            hint: `Bridge through 10!`,
+            visual: { type: 'dots-subtract', total: a, remove: b }
+        };
+    }
+
+    function generateSubMissing() {
+        const a = Math.floor(Math.random() * 8) + 8; // 8-15
+        const b = Math.floor(Math.random() * (a - 3)) + 2;
+        const answer = a - b;
+
+        // Randomly hide either b or answer
+        const hidePos = Math.floor(Math.random() * 2);
+        let question, hiddenValue;
+
+        if (hidePos === 0) {
+            question = `${a} - ? = ${answer}`;
+            hiddenValue = b;
+        } else {
+            question = `${a} - ${b} = ?`;
+            hiddenValue = answer;
+        }
+
+        return {
+            question: question,
+            answer: hiddenValue,
+            options: generateOptions(hiddenValue, 1, a),
+            hint: `Find the missing number!`,
+            visual: { type: 'dots-subtract', total: a, remove: b }
+        };
+    }
+
+    function generateOptions(correctAnswer, min, max) {
+        const options = [correctAnswer];
+
+        while (options.length < 4) {
+            const range = Math.max(5, Math.floor((max - min) / 2));
+            const offset = Math.floor(Math.random() * range) - Math.floor(range / 2);
+            let wrongAnswer = correctAnswer + offset;
+
+            // Keep within bounds and avoid duplicates
+            if (wrongAnswer >= min && wrongAnswer <= max && !options.includes(wrongAnswer) && wrongAnswer !== correctAnswer) {
+                options.push(wrongAnswer);
+            }
+        }
+
+        // Shuffle options
+        return options.sort(() => Math.random() - 0.5);
+    }
+
+    // --- VISUAL AID RENDERER ---
+
+    function renderVisualAid(visual) {
+        const container = document.getElementById('visual-container');
+        container.innerHTML = '';
+
+        if (visual.type === 'dots-two-groups') {
+            const grid = document.createElement('div');
+            grid.className = 'tf-grid';
+            grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+
+            const total = visual.a + visual.b;
+            for (let i = 0; i < Math.min(total, 25); i++) {
+                const dot = document.createElement('div');
+                if (i < visual.a) {
+                    dot.className = 'dot dot-red';
+                } else {
+                    dot.className = 'dot dot-blue';
+                }
+                grid.appendChild(dot);
+            }
+
+            container.appendChild(grid);
+        }
+        else if (visual.type === 'dots-bond') {
+            const grid = document.createElement('div');
+            grid.className = 'tf-grid';
+            grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+
+            for (let i = 0; i < Math.min(visual.total, 25); i++) {
+                const dot = document.createElement('div');
+                if (i < visual.filled) {
+                    dot.className = 'dot dot-red';
+                } else {
+                    dot.className = 'dot'; // Empty/unfilled
+                }
+                grid.appendChild(dot);
+            }
+
+            container.appendChild(grid);
+        }
+        else if (visual.type === 'dots-bridge-ten') {
+            const grid = document.createElement('div');
+            grid.className = 'tf-grid';
+            grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+
+            // First show 'a' dots in red
+            for (let i = 0; i < visual.a; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot dot-red';
+                grid.appendChild(dot);
+            }
+
+            // Then show 'b' dots in blue
+            for (let i = 0; i < visual.b; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot dot-blue';
+                grid.appendChild(dot);
+            }
+
+            container.appendChild(grid);
+        }
+        else if (visual.type === 'dots-subtract') {
+            const grid = document.createElement('div');
+            grid.className = 'tf-grid';
+            grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+
+            for (let i = 0; i < Math.min(visual.total, 25); i++) {
+                const dot = document.createElement('div');
+                if (i < visual.remove) {
+                    dot.className = 'dot dot-crossed';
+                } else {
+                    dot.className = 'dot dot-red';
+                }
+                grid.appendChild(dot);
+            }
+
+            container.appendChild(grid);
+        }
+        else if (visual.type === 'dots-compare') {
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.gap = '4px';
+
+            // Group A
+            const gridA = document.createElement('div');
+            gridA.className = 'tf-grid';
+            gridA.style.gridTemplateColumns = 'repeat(5, 1fr)';
+            gridA.style.width = '100px';
+            for (let i = 0; i < Math.min(visual.a, 15); i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot dot-red';
+                gridA.appendChild(dot);
+            }
+
+            // Group B
+            const gridB = document.createElement('div');
+            gridB.className = 'tf-grid';
+            gridB.style.gridTemplateColumns = 'repeat(5, 1fr)';
+            gridB.style.width = '100px';
+            for (let i = 0; i < Math.min(visual.b, 15); i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot dot-blue';
+                gridB.appendChild(dot);
+            }
+
+            wrapper.appendChild(gridA);
+            wrapper.appendChild(gridB);
+            container.appendChild(wrapper);
+        }
+    }
+
+    // --- ANSWER CHECKING ---
+
+    function checkAnswer(selected) {
+        if (!currentQuestion) return;
+
+        const isCorrect = selected === currentQuestion.answer;
+        const container = document.getElementById('options-container');
+
+        // Disable all buttons
+        Array.from(container.children).forEach(btn => {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            if (parseInt(btn.innerText) === currentQuestion.answer) {
+                btn.style.borderColor = '#22c55e';
+                btn.style.borderWidth = '4px';
+            }
+        });
+
+        if (isCorrect) {
+            sfx.shock();
+            dealDamage(10);
+
+            setTimeout(() => {
+                if (state.enemyHp <= 0) {
+                    winBattle();
+                } else {
+                    const r = REGIONS[state.regionId];
+                    const lvl = r.levels[state.currentLvl];
+                    generateQuestion(lvl.type);
+                }
+            }, 1500);
+        } else {
+            sfx.impact();
+            // Flash screen red
+            const fx = document.getElementById('fx-container');
+            fx.style.background = 'rgba(255,0,0,0.5)';
+            setTimeout(() => fx.style.background = '', 300);
+
+            // Optionally lose player HP (not implemented yet, but you could add this)
+            setTimeout(() => {
+                const r = REGIONS[state.regionId];
+                const lvl = r.levels[state.currentLvl];
+                generateQuestion(lvl.type);
+            }, 1500);
+        }
+    }
+
+    function dealDamage(amount) {
+        state.enemyHp = Math.max(0, state.enemyHp - amount);
+        updateHPBars();
+
+        // Shake enemy sprite
+        const enemy = document.getElementById('enemy-sprite');
+        enemy.classList.add('shake-hard');
+        setTimeout(() => enemy.classList.remove('shake-hard'), 400);
+
+        // Show damage number
+        showDamageNumber(amount);
+    }
+
+    function showDamageNumber(dmg) {
+        const container = document.getElementById('fx-container');
+        const num = document.createElement('div');
+        num.className = 'damage-number';
+        num.innerText = `-${dmg}`;
+        num.style.left = '60%';
+        num.style.top = '30%';
+        container.appendChild(num);
+
+        setTimeout(() => num.remove(), 1000);
+    }
+
+    function updateHPBars() {
+        const enemyBar = document.getElementById('enemy-hp');
+        const playerBar = document.getElementById('player-hp');
+
+        const enemyPercent = (state.enemyHp / state.maxHp) * 100;
+        enemyBar.style.width = enemyPercent + '%';
+
+        // Color coding
+        if (enemyPercent > 50) {
+            enemyBar.style.backgroundColor = '#22c55e';
+        } else if (enemyPercent > 25) {
+            enemyBar.style.backgroundColor = '#eab308';
+        } else {
+            enemyBar.style.backgroundColor = '#ef4444';
+        }
+
+        playerBar.style.width = state.playerHp + '%';
+    }
+
+    // --- BATTLE END ---
+
+    function winBattle() {
+        sfx.win();
+
+        const r = REGIONS[state.regionId];
+        const lvl = r.levels[state.currentLvl];
+
+        // Mark level as complete
+        if (state.currentLvl === state.unlocked) {
+            state.unlocked++;
+        }
+
+        // Check if this was a boss battle
+        if (lvl.isBoss) {
+            // Unlock next region
+            if (state.regionId === 'pewter' && state.maxRegion < 1) {
+                state.maxRegion = 1;
+            }
+            saveGame();
+            showBoosterPack();
+        } else {
+            // Regular trainer
+            saveGame();
+            showTrainerWin();
+        }
+    }
+
+    function showTrainerWin() {
+        switchView('view-win-trainer');
+    }
+
+    function showBoosterPack() {
+        const container = document.getElementById('booster-container');
+        container.innerHTML = '';
+        state.cardsRevealed = 0;
+        state.pendingPokes = [];
+
+        // Give boss pokemon as guaranteed reward
+        const r = REGIONS[state.regionId];
+        const bossPoke = r.prize.sprite;
+
+        // Add boss pokemon
+        if (!state.unlockedPokes.includes(bossPoke)) {
+            state.pendingPokes.push(bossPoke);
+        }
+
+        // Add 2 random pokemon from pool
+        const available = RANDOM_POOL.filter(p => !state.unlockedPokes.includes(p.id));
+        for (let i = 0; i < 2 && available.length > 0; i++) {
+            const idx = Math.floor(Math.random() * available.length);
+            const poke = available.splice(idx, 1)[0];
+            state.pendingPokes.push(poke.id);
+        }
+
+        // Create card backs
+        state.pendingPokes.forEach((pokeId, idx) => {
+            const card = document.createElement('div');
+            card.className = 'w-24 h-32 bg-gradient-to-br from-purple-600 to-indigo-800 rounded-lg shadow-xl cursor-pointer transform hover:scale-105 transition-all flex items-center justify-center border-4 border-yellow-400';
+            card.innerHTML = '<span class="text-4xl">⭐</span>';
+            card.onclick = () => revealCard(card, pokeId, idx);
+            container.appendChild(card);
+        });
+
+        switchView('view-booster');
+    }
+
+    function revealCard(cardElement, pokeId, idx) {
+        if (cardElement.dataset.revealed) return;
+        cardElement.dataset.revealed = 'true';
+
+        sfx.reveal();
+
+        // Flip animation
+        cardElement.style.transform = 'rotateY(180deg)';
+
+        setTimeout(() => {
+            cardElement.innerHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokeId}.png" class="w-full h-full object-contain p-2">`;
+            cardElement.style.transform = 'rotateY(0deg) scale(1.1)';
+
+            // Add to unlocked
+            if (!state.unlockedPokes.includes(pokeId)) {
+                state.unlockedPokes.push(pokeId);
+            }
+
+            state.cardsRevealed++;
+
+            if (state.cardsRevealed === state.pendingPokes.length) {
+                // All cards revealed
+                const btn = document.getElementById('btn-collect');
+                btn.classList.remove('opacity-0', 'pointer-events-none');
+                saveGame();
+            }
+        }, 300);
+    }
+
+    function collectReward() {
+        sfx.click();
+        state.pendingPokes = [];
+        switchView('view-world');
+    }
+
+    function endBattle() {
+        sfx.click();
+        goToMap();
+    }
+
+    // Initialize on load
+    loadSave();
 </script>
+</body>
+</html>
