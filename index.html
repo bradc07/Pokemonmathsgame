@@ -298,6 +298,70 @@
         .joy-btn { width: 18px; height: 18px; background: #222; border-radius: 50%; position: absolute; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
+        /* --- BOOSTER PACK CARD STYLES --- */
+        .booster-card-container {
+            perspective: 1000px;
+            width: 200px;
+            height: 280px;
+            cursor: pointer;
+        }
+
+        .booster-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .booster-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 4px solid #FCD34D;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .card-front {
+            transform: rotateY(180deg);
+            background: white;
+            border: 4px solid #FCD34D;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        .mini-tcg-card {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            background-color: #f7f7f7;
+            position: relative;
+        }
+
+        @keyframes card-glow {
+            0%, 100% { box-shadow: 0 10px 30px rgba(252, 211, 77, 0.5); }
+            50% { box-shadow: 0 10px 50px rgba(252, 211, 77, 1), 0 0 30px rgba(252, 211, 77, 0.8); }
+        }
+
+        .booster-card-container:hover .card-back {
+            animation: card-glow 2s infinite;
+        }
+
     </style>
 </head>
 <body>
@@ -1567,30 +1631,78 @@
             state.pendingPokes.push(poke.id);
         }
 
-        // Create card backs
+        // Create 3D flip cards
         state.pendingPokes.forEach((pokeId, idx) => {
+            const cardContainer = document.createElement('div');
+            cardContainer.className = 'booster-card-container';
+
             const card = document.createElement('div');
-            card.className = 'w-24 h-32 bg-gradient-to-br from-purple-600 to-indigo-800 rounded-lg shadow-xl cursor-pointer transform hover:scale-105 transition-all flex items-center justify-center border-4 border-yellow-400';
-            card.innerHTML = '<span class="text-4xl">⭐</span>';
-            card.onclick = () => revealCard(card, pokeId, idx);
-            container.appendChild(card);
+            card.className = 'booster-card';
+            card.dataset.pokeid = pokeId;
+
+            // Card back
+            const cardBack = document.createElement('div');
+            cardBack.className = 'card-face card-back';
+            cardBack.innerHTML = `
+                <div class="text-center">
+                    <div class="text-6xl mb-2">⭐</div>
+                    <div class="text-white font-bold text-sm pixel-font">CLICK TO<br>REVEAL</div>
+                </div>
+            `;
+
+            // Card front (will be populated on click)
+            const cardFront = document.createElement('div');
+            cardFront.className = 'card-face card-front';
+            cardFront.id = `card-front-${idx}`;
+
+            card.appendChild(cardBack);
+            card.appendChild(cardFront);
+            cardContainer.appendChild(card);
+
+            cardContainer.onclick = () => revealCard(card, cardFront, pokeId, idx);
+            container.appendChild(cardContainer);
         });
 
         switchView('view-booster');
     }
 
-    function revealCard(cardElement, pokeId, idx) {
+    function revealCard(cardElement, cardFront, pokeId, idx) {
         if (cardElement.dataset.revealed) return;
         cardElement.dataset.revealed = 'true';
 
-        sfx.reveal();
+        sfx.spin();
 
-        // Flip animation
-        cardElement.style.transform = 'rotateY(180deg)';
+        // Flip the card
+        cardElement.classList.add('flipped');
 
+        // Get Pokemon data
+        const data = POKEDEX_DB[pokeId] || POKEDEX_DB["default"];
+
+        // Populate card front with mini TCG card
         setTimeout(() => {
-            cardElement.innerHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokeId}.png" class="w-full h-full object-contain p-2">`;
-            cardElement.style.transform = 'rotateY(0deg) scale(1.1)';
+            cardFront.innerHTML = `
+                <div class="mini-tcg-card ${data.color}">
+                    <div style="font-size: 10px; font-weight: 900; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="text-transform: capitalize;">${data.name}</span>
+                        <span style="color: #d32f2f; font-family: 'Bangers', cursive;">HP ${data.hp}</span>
+                    </div>
+                    <div style="border: 2px solid #AA9944; background: linear-gradient(to bottom, #777, #fff); height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png" style="width: 100%; height: 100%; object-fit: contain; padding: 4px;">
+                    </div>
+                    <div style="background: linear-gradient(to right, #e0c352, #f5e089, #e0c352); font-size: 6px; text-align: center; padding: 2px; border-radius: 2px; margin-bottom: 4px; font-weight: bold; color: #5a4a1b;">
+                        NO. ${pokeId.padStart(3, '0')} · ${data.type}
+                    </div>
+                    <div style="font-size: 8px; font-weight: bold; margin-bottom: 2px;">${data.moves[0]?.n || 'Tackle'}</div>
+                    <div style="font-size: 6px; font-style: italic; color: #666; line-height: 1.2; margin-top: auto;">
+                        ${data.desc.substring(0, 80)}...
+                    </div>
+                    <div style="position: absolute; top: 4px; right: 4px; font-size: 16px;">
+                        ${data.type === 'Electric' ? '⚡' : data.type === 'Fire' ? '🔥' : data.type === 'Water' ? '💧' : data.type === 'Grass' ? '🍃' : data.type.includes('Rock') ? '🪨' : '⚪'}
+                    </div>
+                </div>
+            `;
+
+            sfx.reveal();
 
             // Add to unlocked
             if (!state.unlockedPokes.includes(pokeId)) {
@@ -1601,11 +1713,13 @@
 
             if (state.cardsRevealed === state.pendingPokes.length) {
                 // All cards revealed
-                const btn = document.getElementById('btn-collect');
-                btn.classList.remove('opacity-0', 'pointer-events-none');
-                saveGame();
+                setTimeout(() => {
+                    const btn = document.getElementById('btn-collect');
+                    btn.classList.remove('opacity-0', 'pointer-events-none');
+                    saveGame();
+                }, 500);
             }
-        }, 300);
+        }, 400);
     }
 
     function collectReward() {
