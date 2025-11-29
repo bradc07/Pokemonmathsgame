@@ -362,6 +362,165 @@
             animation: card-glow 2s infinite;
         }
 
+        /* --- VICTORY SCREEN STYLES --- */
+        .ray {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 100%;
+            background: linear-gradient(to bottom,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,200,0.3) 20%,
+                rgba(255,255,150,0.5) 50%,
+                rgba(255,255,200,0.3) 80%,
+                rgba(255,255,255,0) 100%
+            );
+            transform-origin: top center;
+            opacity: 0.6;
+        }
+
+        .ray-1 { transform: rotate(0deg); }
+        .ray-2 { transform: rotate(45deg); }
+        .ray-3 { transform: rotate(90deg); }
+        .ray-4 { transform: rotate(135deg); }
+        .ray-5 { transform: rotate(180deg); }
+        .ray-6 { transform: rotate(225deg); }
+        .ray-7 { transform: rotate(270deg); }
+        .ray-8 { transform: rotate(315deg); }
+
+        .victory-banner {
+            position: relative;
+            z-index: 30;
+        }
+
+        .banner-ribbon {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #1e40af 100%);
+            border: 4px solid #fbbf24;
+            border-radius: 20px;
+            padding: 12px 40px;
+            box-shadow:
+                0 8px 20px rgba(0,0,0,0.4),
+                inset 0 2px 10px rgba(255,255,255,0.3),
+                inset 0 -2px 10px rgba(0,0,0,0.3);
+            position: relative;
+            transform: perspective(500px) rotateX(-5deg);
+        }
+
+        .banner-ribbon::before,
+        .banner-ribbon::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30px;
+            height: 30px;
+            background: #fbbf24;
+            transform: translateY(-50%) rotate(45deg);
+        }
+
+        .banner-ribbon::before { left: -15px; }
+        .banner-ribbon::after { right: -15px; }
+
+        .banner-text {
+            font-family: 'Bangers', cursive;
+            font-size: 36px;
+            color: #fef08a;
+            text-shadow:
+                3px 3px 0px #1e3a8a,
+                4px 4px 0px #1e40af,
+                5px 5px 10px rgba(0,0,0,0.5);
+            letter-spacing: 4px;
+            margin: 0;
+        }
+
+        .continue-btn {
+            background: linear-gradient(to bottom, #4ade80 0%, #22c55e 50%, #16a34a 100%);
+            color: white;
+            font-family: 'Bangers', cursive;
+            font-size: 24px;
+            padding: 12px 48px;
+            border: 4px solid white;
+            border-radius: 16px;
+            box-shadow:
+                0 6px 0px #15803d,
+                0 8px 20px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 2px;
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 8px 0px #15803d,
+                0 12px 25px rgba(0,0,0,0.5);
+        }
+
+        .continue-btn:active {
+            transform: translateY(4px);
+            box-shadow:
+                0 2px 0px #15803d,
+                0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Ornate card borders */
+        .ornate-card-border {
+            border: 6px solid;
+            border-image: linear-gradient(135deg, #f59e0b 0%, #fbbf24 25%, #fef08a 50%, #fbbf24 75%, #f59e0b 100%) 1;
+            box-shadow:
+                0 0 20px rgba(251, 191, 36, 0.6),
+                inset 0 0 20px rgba(251, 191, 36, 0.2),
+                0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .card-back-design {
+            background: radial-gradient(ellipse at center,
+                #667eea 0%,
+                #764ba2 50%,
+                #4c1d95 100%
+            );
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-back-design::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/><circle cx="50" cy="50" r="20" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/><circle cx="50" cy="50" r="10" fill="rgba(255,255,255,0.4)"/></svg>');
+            background-size: 60%;
+            background-position: center;
+            background-repeat: no-repeat;
+            animation: rotate-slow 20s linear infinite;
+        }
+
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .victory-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle-float linear infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes particle-float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -635,14 +794,38 @@
                     </div>
                     
                     <!-- VIEW 5: BOOSTER PACK -->
-                    <div id="view-booster" class="game-view bg-purple-900 items-center justify-center text-center p-8 relative overflow-hidden">
-                        <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-700 to-black animate-pulse"></div>
+                    <div id="view-booster" class="game-view bg-gradient-to-b from-yellow-600 via-yellow-500 to-yellow-600 items-center justify-center text-center p-8 relative overflow-hidden">
+                        <!-- Golden rays background -->
+                        <div class="absolute inset-0 overflow-hidden">
+                            <div class="ray ray-1"></div>
+                            <div class="ray ray-2"></div>
+                            <div class="ray ray-3"></div>
+                            <div class="ray ray-4"></div>
+                            <div class="ray ray-5"></div>
+                            <div class="ray ray-6"></div>
+                            <div class="ray ray-7"></div>
+                            <div class="ray ray-8"></div>
+                        </div>
+
+                        <!-- Floating particles -->
+                        <div id="victory-particles" class="absolute inset-0 pointer-events-none"></div>
+
+                        <!-- Content -->
                         <div class="z-10 relative w-full flex flex-col items-center">
-                            <h2 class="pixel-font text-yellow-300 text-xl mb-4 drop-shadow-md">GYM LEADER DEFEATED!</h2>
-                            <p class="text-white text-xs mb-8 uppercase tracking-widest">Tap each card to reveal your prize!</p>
-                            <div id="booster-container" class="flex gap-4 justify-center items-center mb-8"></div>
-                            <button id="btn-collect" onclick="collectReward()" class="bg-green-500 hover:bg-green-400 text-white px-8 py-3 rounded-full font-bold shadow-lg opacity-0 transition-opacity pointer-events-none">
-                                COLLECT & CONTINUE
+                            <!-- Victory Banner -->
+                            <div class="victory-banner mb-6">
+                                <div class="banner-ribbon">
+                                    <h2 class="banner-text">VICTORY!</h2>
+                                </div>
+                                <p id="defeated-text" class="text-white text-sm font-bold mt-2 pixel-font drop-shadow-lg">Defeated Trainer!</p>
+                            </div>
+
+                            <!-- Cards Container -->
+                            <div id="booster-container" class="flex gap-6 justify-center items-center mb-8 z-20"></div>
+
+                            <!-- Continue Button -->
+                            <button id="btn-collect" onclick="collectReward()" class="continue-btn opacity-0 pointer-events-none">
+                                CONTINUE
                             </button>
                         </div>
                     </div>
@@ -1614,8 +1797,12 @@
         state.cardsRevealed = 0;
         state.pendingPokes = [];
 
-        // Give boss pokemon as guaranteed reward
+        // Update defeated text
         const r = REGIONS[state.regionId];
+        const lvl = r.levels[state.currentLvl];
+        document.getElementById('defeated-text').innerText = `Defeated ${lvl.name}!`;
+
+        // Give boss pokemon as guaranteed reward
         const bossPoke = r.prize.sprite;
 
         // Add boss pokemon
@@ -1631,7 +1818,7 @@
             state.pendingPokes.push(poke.id);
         }
 
-        // Create 3D flip cards
+        // Create 3D flip cards with ornate borders
         state.pendingPokes.forEach((pokeId, idx) => {
             const cardContainer = document.createElement('div');
             cardContainer.className = 'booster-card-container';
@@ -1640,19 +1827,18 @@
             card.className = 'booster-card';
             card.dataset.pokeid = pokeId;
 
-            // Card back
+            // Card back with ornate design
             const cardBack = document.createElement('div');
-            cardBack.className = 'card-face card-back';
+            cardBack.className = 'card-face card-back card-back-design ornate-card-border';
             cardBack.innerHTML = `
-                <div class="text-center">
-                    <div class="text-6xl mb-2">⭐</div>
-                    <div class="text-white font-bold text-sm pixel-font">CLICK TO<br>REVEAL</div>
+                <div class="text-center relative z-10">
+                    <div class="text-7xl mb-3" style="filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));">⚪</div>
                 </div>
             `;
 
             // Card front (will be populated on click)
             const cardFront = document.createElement('div');
-            cardFront.className = 'card-face card-front';
+            cardFront.className = 'card-face card-front ornate-card-border';
             cardFront.id = `card-front-${idx}`;
 
             card.appendChild(cardBack);
@@ -1663,7 +1849,29 @@
             container.appendChild(cardContainer);
         });
 
+        // Create floating particles
+        createVictoryParticles();
+
         switchView('view-booster');
+    }
+
+    function createVictoryParticles() {
+        const particleContainer = document.getElementById('victory-particles');
+        particleContainer.innerHTML = '';
+
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'victory-particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            particle.style.animationDelay = Math.random() * 2 + 's';
+
+            // Random colors (white, yellow, pink)
+            const colors = ['#ffffff', '#fef08a', '#fbbf24', '#fecaca', '#ddd6fe'];
+            particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+            particleContainer.appendChild(particle);
+        }
     }
 
     function revealCard(cardElement, cardFront, pokeId, idx) {
@@ -1678,26 +1886,38 @@
         // Get Pokemon data
         const data = POKEDEX_DB[pokeId] || POKEDEX_DB["default"];
 
-        // Populate card front with mini TCG card
+        // Populate card front with beautiful TCG card
         setTimeout(() => {
+            const typeIcon = data.type === 'Electric' ? '⚡' :
+                           data.type === 'Fire' ? '🔥' :
+                           data.type === 'Water' ? '💧' :
+                           data.type === 'Grass' ? '🍃' :
+                           data.type.includes('Rock') ? '🪨' : '⚪';
+
             cardFront.innerHTML = `
-                <div class="mini-tcg-card ${data.color}">
-                    <div style="font-size: 10px; font-weight: 900; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="text-transform: capitalize;">${data.name}</span>
-                        <span style="color: #d32f2f; font-family: 'Bangers', cursive;">HP ${data.hp}</span>
+                <div class="mini-tcg-card ${data.color}" style="background-image: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 10%); background-size: 15px 15px;">
+                    <div style="font-size: 12px; font-weight: 900; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="text-transform: capitalize; color: #000;">${data.name}</span>
+                        <div style="display: flex; align-items: center; gap: 2px;">
+                            <span style="color: #d32f2f; font-family: 'Bangers', cursive; font-size: 14px;">HP</span>
+                            <span style="color: #d32f2f; font-family: 'Bangers', cursive; font-size: 18px;">${data.hp}</span>
+                        </div>
                     </div>
-                    <div style="border: 2px solid #AA9944; background: linear-gradient(to bottom, #777, #fff); height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px;">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png" style="width: 100%; height: 100%; object-fit: contain; padding: 4px;">
+                    <div style="border: 3px solid #d4a574; background: linear-gradient(to bottom, #87ceeb, #fff); height: 140px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; border-radius: 4px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); position: relative; overflow: hidden;">
+                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png" style="width: 90%; height: 90%; object-fit: contain; position: relative; z-index: 2; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));">
                     </div>
-                    <div style="background: linear-gradient(to right, #e0c352, #f5e089, #e0c352); font-size: 6px; text-align: center; padding: 2px; border-radius: 2px; margin-bottom: 4px; font-weight: bold; color: #5a4a1b;">
-                        NO. ${pokeId.padStart(3, '0')} · ${data.type}
+                    <div style="background: linear-gradient(to right, #d4a574 0%, #f5e6b3 50%, #d4a574 100%); font-size: 7px; text-align: center; padding: 3px; border-radius: 3px; margin-bottom: 5px; font-weight: bold; color: #654321; border: 1px solid #b8935e; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
+                        NO. ${pokeId.padStart(3, '0')} · ${data.type.toUpperCase()}
                     </div>
-                    <div style="font-size: 8px; font-weight: bold; margin-bottom: 2px;">${data.moves[0]?.n || 'Tackle'}</div>
-                    <div style="font-size: 6px; font-style: italic; color: #666; line-height: 1.2; margin-top: auto;">
-                        ${data.desc.substring(0, 80)}...
+                    <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px; color: #222;">
+                        ${data.moves[0]?.n || 'Tackle'}
+                        <span style="float: right; font-family: 'Bangers', cursive; font-size: 13px;">${data.moves[0]?.d || '10'}</span>
                     </div>
-                    <div style="position: absolute; top: 4px; right: 4px; font-size: 16px;">
-                        ${data.type === 'Electric' ? '⚡' : data.type === 'Fire' ? '🔥' : data.type === 'Water' ? '💧' : data.type === 'Grass' ? '🍃' : data.type.includes('Rock') ? '🪨' : '⚪'}
+                    <div style="font-size: 7px; font-style: italic; color: #555; line-height: 1.3; margin-top: auto; padding: 3px; background: rgba(255,255,255,0.5); border-radius: 3px;">
+                        ${data.desc.substring(0, 70)}...
+                    </div>
+                    <div style="position: absolute; top: 8px; right: 8px; font-size: 20px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                        ${typeIcon}
                     </div>
                 </div>
             `;
