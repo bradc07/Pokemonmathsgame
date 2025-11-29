@@ -875,10 +875,10 @@
     }
 
     function updateWorldMap() {
-        const cerulean = document.getElementById('node-cerulean');
-        const lock = document.getElementById('lock-cerulean');
-        const img = document.getElementById('img-cerulean');
-        
+        const cerulean = document.getElementById('node-town2');
+        const lock = document.getElementById('lock-town2');
+        const img = document.getElementById('img-town2');
+
         if (state.maxRegion >= 1 && cerulean && lock && img) {
             cerulean.classList.remove('town-locked');
             lock.classList.add('hidden');
@@ -1018,64 +1018,75 @@
     }
 
     function generateQuestion(type) {
-        currentQuestion = null;
-        const container = document.getElementById('options-container');
-        container.innerHTML = '';
+        try {
+            currentQuestion = null;
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
 
-        let q = null;
+            let q = null;
 
-        switch(type) {
-            case 'add':
-                q = generateAddition();
-                break;
-            case 'bond':
-                q = generateNumberBond();
-                break;
-            case 'double':
-                q = generateDoubles();
-                break;
-            case 'bridge':
-                q = generateBridgeTen();
-                break;
-            case 'missing':
-                q = generateMissingNumber();
-                break;
-            case 'sub_simple':
-                q = generateSubtraction();
-                break;
-            case 'sub_10':
-                q = generateSubFrom10();
-                break;
-            case 'difference':
-                q = generateDifference();
-                break;
-            case 'sub_bridge':
-                q = generateSubBridge();
-                break;
-            case 'sub_missing':
-                q = generateSubMissing();
-                break;
-            default:
-                q = generateAddition();
+            switch(type) {
+                case 'add':
+                    q = generateAddition();
+                    break;
+                case 'bond':
+                    q = generateNumberBond();
+                    break;
+                case 'double':
+                    q = generateDoubles();
+                    break;
+                case 'bridge':
+                    q = generateBridgeTen();
+                    break;
+                case 'missing':
+                    q = generateMissingNumber();
+                    break;
+                case 'sub_simple':
+                    q = generateSubtraction();
+                    break;
+                case 'sub_10':
+                    q = generateSubFrom10();
+                    break;
+                case 'difference':
+                    q = generateDifference();
+                    break;
+                case 'sub_bridge':
+                    q = generateSubBridge();
+                    break;
+                case 'sub_missing':
+                    q = generateSubMissing();
+                    break;
+                default:
+                    q = generateAddition();
+            }
+
+            if (!q || !q.options || q.options.length < 4) {
+                console.error('Invalid question generated:', q);
+                q = generateAddition(); // Fallback
+            }
+
+            currentQuestion = q;
+
+            // Display question
+            document.getElementById('question-text').innerText = q.question;
+            document.getElementById('hint-text').innerText = q.hint;
+
+            // Render visual aid
+            renderVisualAid(q.visual);
+
+            // Create answer buttons
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'h-full bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-black text-2xl rounded-lg shadow-lg transform active:scale-95 transition-all';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt);
+                container.appendChild(btn);
+            });
+        } catch (error) {
+            console.error('Error generating question:', error);
+            // Fallback to simple addition
+            setTimeout(() => generateQuestion('add'), 100);
         }
-
-        currentQuestion = q;
-
-        // Display question
-        document.getElementById('question-text').innerText = q.question;
-        document.getElementById('hint-text').innerText = q.hint;
-
-        // Render visual aid
-        renderVisualAid(q.visual);
-
-        // Create answer buttons
-        q.options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'h-full bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-black text-2xl rounded-lg shadow-lg transform active:scale-95 transition-all';
-            btn.innerText = opt;
-            btn.onclick = () => checkAnswer(opt);
-            container.appendChild(btn);
-        });
     }
 
     // --- QUESTION GENERATORS ---
@@ -1248,14 +1259,44 @@
     function generateOptions(correctAnswer, min, max) {
         const options = [correctAnswer];
 
-        while (options.length < 4) {
-            const range = Math.max(5, Math.floor((max - min) / 2));
-            const offset = Math.floor(Math.random() * range) - Math.floor(range / 2);
-            let wrongAnswer = correctAnswer + offset;
+        // Safety: Ensure we have enough range for 4 unique options
+        const availableRange = max - min + 1;
+        if (availableRange < 4) {
+            // Expand range if too small
+            min = Math.max(0, correctAnswer - 5);
+            max = correctAnswer + 5;
+        }
 
-            // Keep within bounds and avoid duplicates
-            if (wrongAnswer >= min && wrongAnswer <= max && !options.includes(wrongAnswer) && wrongAnswer !== correctAnswer) {
+        let attempts = 0;
+        const maxAttempts = 100; // Prevent infinite loops
+
+        while (options.length < 4 && attempts < maxAttempts) {
+            attempts++;
+
+            // Generate a random number in the range
+            const wrongAnswer = Math.floor(Math.random() * (max - min + 1)) + min;
+
+            // Add if unique and different from correct answer
+            if (!options.includes(wrongAnswer)) {
                 options.push(wrongAnswer);
+            }
+        }
+
+        // If we still don't have 4 options, fill with nearby numbers
+        while (options.length < 4) {
+            let candidate = correctAnswer + (options.length - 2);
+            if (candidate < min) candidate = min + options.length;
+            if (candidate > max) candidate = max - (4 - options.length);
+
+            if (!options.includes(candidate)) {
+                options.push(candidate);
+            } else {
+                // Last resort: use any number in range
+                for (let i = min; i <= max && options.length < 4; i++) {
+                    if (!options.includes(i)) {
+                        options.push(i);
+                    }
+                }
             }
         }
 
@@ -1309,15 +1350,19 @@
             grid.className = 'tf-grid';
             grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
 
+            const total = visual.a + visual.b;
+            const safeA = Math.min(visual.a, 25);
+            const safeB = Math.min(visual.b, 25 - safeA);
+
             // First show 'a' dots in red
-            for (let i = 0; i < visual.a; i++) {
+            for (let i = 0; i < safeA; i++) {
                 const dot = document.createElement('div');
                 dot.className = 'dot dot-red';
                 grid.appendChild(dot);
             }
 
             // Then show 'b' dots in blue
-            for (let i = 0; i < visual.b; i++) {
+            for (let i = 0; i < safeB; i++) {
                 const dot = document.createElement('div');
                 dot.className = 'dot dot-blue';
                 grid.appendChild(dot);
