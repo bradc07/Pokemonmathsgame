@@ -298,12 +298,22 @@
         .joy-btn { width: 18px; height: 18px; background: #222; border-radius: 50%; position: absolute; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
-        /* --- BOOSTER PACK CARD STYLES --- */
+        /* --- ENHANCED BOOSTER CARD STYLES --- */
         .booster-card-container {
             perspective: 1000px;
-            width: 200px;
-            height: 280px;
+            width: 220px; /* Slightly larger */
+            height: 320px;
             cursor: pointer;
+            position: relative;
+            /* Entrance Animation defaults (controlled by JS delays) */
+            opacity: 0;
+            transform: translateY(50px);
+            animation: deal-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes deal-in {
+            from { opacity: 0; transform: translateY(100px) scale(0.8) rotateX(20deg); }
+            to { opacity: 1; transform: translateY(0) scale(1) rotateX(0); }
         }
 
         .booster-card {
@@ -311,11 +321,25 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            /* The transition handles the hover lift, the animation handles the flip */
+            transition: transform 0.3s ease;
         }
 
+        /* Hover Effect only when not revealed */
+        .booster-card-container:hover .booster-card:not(.revealed) {
+            transform: translateY(-10px) rotateX(5deg);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        /* THE DRAMATIC SPIN CLASS */
         .booster-card.flipped {
-            transform: rotateY(180deg);
+            animation: spin-reveal 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes spin-reveal {
+            0% { transform: rotateY(0) scale(1); }
+            40% { transform: rotateY(900deg) scale(1.4); } /* Zoom in and spin fast */
+            100% { transform: rotateY(1980deg) scale(1); } /* Land gently on 1980 (multiple of 360 + 180) */
         }
 
         .card-face {
@@ -323,24 +347,45 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 12px;
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            border: 4px solid #FCD34D; /* Gold border base */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .card-back {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: 4px solid #FCD34D;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e3a8a 100%);
+            /* Complex pattern for back */
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 60%),
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 2px, transparent 2px, transparent 10px);
+        }
+
+        /* Enhance the Poke Ball on back */
+        .card-back::after {
+            content: '';
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 6px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            position: absolute;
+        }
+        .card-back::before {
+             content: '';
+             width: 100%;
+             height: 6px;
+             background: rgba(255,255,255,0.3);
+             position: absolute;
+             transform: rotate(-45deg);
         }
 
         .card-front {
-            transform: rotateY(180deg);
+            transform: rotateY(180deg); /* Start facing away */
             background: white;
-            border: 4px solid #FCD34D;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            overflow: hidden;
         }
 
         .mini-tcg-card {
@@ -353,13 +398,32 @@
             position: relative;
         }
 
-        @keyframes card-glow {
-            0%, 100% { box-shadow: 0 10px 30px rgba(252, 211, 77, 0.5); }
-            50% { box-shadow: 0 10px 50px rgba(252, 211, 77, 1), 0 0 30px rgba(252, 211, 77, 0.8); }
+        /* Gold Shine Effect for Rare Cards */
+        .gold-shine {
+            position: absolute;
+            inset: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right, transparent, rgba(255, 215, 0, 0.3), transparent);
+            transform: rotate(45deg) translateY(-100%);
+            animation: shine-sweep 3s infinite;
+            pointer-events: none;
+            z-index: 20;
+        }
+        @keyframes shine-sweep {
+            0% { transform: rotate(45deg) translateY(-100%); }
+            20% { transform: rotate(45deg) translateY(100%); }
+            100% { transform: rotate(45deg) translateY(100%); }
         }
 
-        .booster-card-container:hover .card-back {
-            animation: card-glow 2s infinite;
+        /* --- CONFETTI --- */
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #f00;
+            pointer-events: none;
+            z-index: 100;
         }
 
         /* --- VICTORY SCREEN STYLES --- */
@@ -1797,61 +1861,63 @@
         state.cardsRevealed = 0;
         state.pendingPokes = [];
 
-        // Update defeated text
+        // Update text
         const r = REGIONS[state.regionId];
         const lvl = r.levels[state.currentLvl];
         document.getElementById('defeated-text').innerText = `Defeated ${lvl.name}!`;
 
-        // Give boss pokemon as guaranteed reward
+        // 1. Guaranteed Boss Card
         const bossPoke = r.prize.sprite;
-
-        // Add boss pokemon
         if (!state.unlockedPokes.includes(bossPoke)) {
             state.pendingPokes.push(bossPoke);
         }
 
-        // Add 2 random pokemon from pool
+        // 2. Fill rest with randoms (Total 3 cards)
+        const slotsNeeded = 3 - state.pendingPokes.length;
         const available = RANDOM_POOL.filter(p => !state.unlockedPokes.includes(p.id));
-        for (let i = 0; i < 2 && available.length > 0; i++) {
-            const idx = Math.floor(Math.random() * available.length);
-            const poke = available.splice(idx, 1)[0];
-            state.pendingPokes.push(poke.id);
+
+        for (let i = 0; i < slotsNeeded; i++) {
+            // Fallback if we unlocked everything, just show a random duplicate
+            if(available.length > 0) {
+                const idx = Math.floor(Math.random() * available.length);
+                state.pendingPokes.push(available.splice(idx, 1)[0].id);
+            } else {
+                state.pendingPokes.push(RANDOM_POOL[Math.floor(Math.random()*RANDOM_POOL.length)].id);
+            }
         }
 
-        // Create 3D flip cards with ornate borders
+        // Create Cards with Staggered Entrance
         state.pendingPokes.forEach((pokeId, idx) => {
             const cardContainer = document.createElement('div');
             cardContainer.className = 'booster-card-container';
+            // Stagger animation: 0s, 0.2s, 0.4s
+            cardContainer.style.animationDelay = `${idx * 0.2}s`;
 
             const card = document.createElement('div');
             card.className = 'booster-card';
             card.dataset.pokeid = pokeId;
 
-            // Card back with ornate design
+            // Back
             const cardBack = document.createElement('div');
-            cardBack.className = 'card-face card-back card-back-design ornate-card-border';
-            cardBack.innerHTML = `
-                <div class="text-center relative z-10">
-                    <div class="text-7xl mb-3" style="filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));">⚪</div>
-                </div>
-            `;
+            cardBack.className = 'card-face card-back';
+            // (CSS handles the design now)
 
-            // Card front (will be populated on click)
+            // Front
             const cardFront = document.createElement('div');
-            cardFront.className = 'card-face card-front ornate-card-border';
+            cardFront.className = 'card-face card-front';
             cardFront.id = `card-front-${idx}`;
 
             card.appendChild(cardBack);
             card.appendChild(cardFront);
             cardContainer.appendChild(card);
 
-            cardContainer.onclick = () => revealCard(card, cardFront, pokeId, idx);
+            // Click Event
+            cardContainer.onclick = (e) => revealCard(card, cardFront, pokeId, e.clientX, e.clientY);
             container.appendChild(cardContainer);
         });
 
-        // Create floating particles
+        // Background FX
         createVictoryParticles();
-
         switchView('view-booster');
     }
 
@@ -1874,78 +1940,116 @@
         }
     }
 
-    function revealCard(cardElement, cardFront, pokeId, idx) {
-        if (cardElement.dataset.revealed) return;
-        cardElement.dataset.revealed = 'true';
+    function revealCard(cardElement, cardFront, pokeId, clickX, clickY) {
+        if (cardElement.classList.contains('flipped')) return; // Prevent double click
 
+        // 1. Play Sound
         sfx.spin();
 
-        // Flip the card
+        // 2. Add class to trigger CSS Animation (The 1980deg spin)
         cardElement.classList.add('flipped');
+        cardElement.classList.add('revealed'); // To disable hover lift
 
-        // Get Pokemon data
+        // 3. Fire Confetti at the card's position
+        // We get the rect to center the explosion on the card
+        const rect = cardElement.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        fireConfetti(centerX, centerY);
+
+        // 4. Populate Data (Hidden until flip completes visual)
         const data = POKEDEX_DB[pokeId] || POKEDEX_DB["default"];
 
-        // Populate card front with beautiful TCG card
-        setTimeout(() => {
-            const typeIcon = data.type === 'Electric' ? '⚡' :
-                           data.type === 'Fire' ? '🔥' :
-                           data.type === 'Water' ? '💧' :
-                           data.type === 'Grass' ? '🍃' :
-                           data.type.includes('Rock') ? '🪨' : '⚪';
+        // Generate TCG HTML (Same as before but with 'gold-shine' added)
+        const typeIcon = data.type === 'Electric' ? '⚡' :
+                         data.type === 'Fire' ? '🔥' :
+                         data.type === 'Water' ? '💧' :
+                         data.type === 'Grass' ? '🍃' : '⚪';
 
-            cardFront.innerHTML = `
-                <div class="mini-tcg-card ${data.color}" style="background-image: radial-gradient(circle, rgba(255,255,255,0.3) 10%, transparent 10%); background-size: 15px 15px;">
-                    <div style="font-size: 12px; font-weight: 900; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="text-transform: capitalize; color: #000;">${data.name}</span>
-                        <div style="display: flex; align-items: center; gap: 2px;">
-                            <span style="color: #d32f2f; font-family: 'Bangers', cursive; font-size: 14px;">HP</span>
-                            <span style="color: #d32f2f; font-family: 'Bangers', cursive; font-size: 18px;">${data.hp}</span>
-                        </div>
-                    </div>
-                    <div style="border: 3px solid #d4a574; background: linear-gradient(to bottom, #87ceeb, #fff); height: 140px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; border-radius: 4px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); position: relative; overflow: hidden;">
-                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png" style="width: 90%; height: 90%; object-fit: contain; position: relative; z-index: 2; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));">
-                    </div>
-                    <div style="background: linear-gradient(to right, #d4a574 0%, #f5e6b3 50%, #d4a574 100%); font-size: 7px; text-align: center; padding: 3px; border-radius: 3px; margin-bottom: 5px; font-weight: bold; color: #654321; border: 1px solid #b8935e; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">
-                        NO. ${pokeId.padStart(3, '0')} · ${data.type.toUpperCase()}
-                    </div>
-                    <div style="font-size: 9px; font-weight: bold; margin-bottom: 3px; color: #222;">
-                        ${data.moves[0]?.n || 'Tackle'}
-                        <span style="float: right; font-family: 'Bangers', cursive; font-size: 13px;">${data.moves[0]?.d || '10'}</span>
-                    </div>
-                    <div style="font-size: 7px; font-style: italic; color: #555; line-height: 1.3; margin-top: auto; padding: 3px; background: rgba(255,255,255,0.5); border-radius: 3px;">
-                        ${data.desc.substring(0, 70)}...
-                    </div>
-                    <div style="position: absolute; top: 8px; right: 8px; font-size: 20px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-                        ${typeIcon}
-                    </div>
+        // Pre-build the HTML
+        cardFront.innerHTML = `
+             <div class="gold-shine"></div>
+             <div class="mini-tcg-card ${data.color}" style="width:100%; height:100%; padding:8px; display:flex; flex-direction:column; position:relative; z-index:10;">
+                <div style="font-size: 12px; font-weight: 900; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="text-transform: capitalize; color: #000;">${data.name}</span>
+                    <span style="color: #d32f2f; font-family: 'Bangers', cursive; font-size: 18px;">${data.hp} HP</span>
                 </div>
-            `;
+                <div style="border: 4px solid #AA9944; background: #fff; height: 150px; margin-bottom: 5px; position: relative; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.2);">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokeId}.png" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div style="font-size: 9px; font-weight: bold; margin-bottom: 4px;">
+                    ${data.moves[0]?.n || 'Attack'} <span style="float:right; font-family:'Bangers'; font-size:14px;">${data.moves[0]?.d || 10}</span>
+                </div>
+                 <div style="font-size: 8px; font-style: italic; color: #555; line-height: 1.2;">
+                    ${data.desc.substring(0, 60)}...
+                </div>
+            </div>
+        `;
 
-            sfx.reveal();
+        // 5. Reveal logic
+        if (!state.unlockedPokes.includes(pokeId)) {
+            state.unlockedPokes.push(pokeId);
+        }
 
-            // Add to unlocked
-            if (!state.unlockedPokes.includes(pokeId)) {
-                state.unlockedPokes.push(pokeId);
-            }
+        // 6. Impact sound when it hits the screen (approx 0.8s into animation)
+        setTimeout(() => {
+            playTone(100, 'square', 0.1, 0.2); // Thud sound
+            playTone(800, 'sine', 0.4, 0.1); // Ding sound
+        }, 800);
 
-            state.cardsRevealed++;
+        // 7. Check if all done
+        state.cardsRevealed++;
+        if (state.cardsRevealed === state.pendingPokes.length) {
+            setTimeout(() => {
+                const btn = document.getElementById('btn-collect');
+                btn.classList.remove('opacity-0', 'pointer-events-none');
+                btn.style.animation = "pulse 1s infinite";
+                saveGame();
+            }, 1500);
+        }
+    }
 
-            if (state.cardsRevealed === state.pendingPokes.length) {
-                // All cards revealed
-                setTimeout(() => {
-                    const btn = document.getElementById('btn-collect');
-                    btn.classList.remove('opacity-0', 'pointer-events-none');
-                    saveGame();
-                }, 500);
-            }
-        }, 400);
+    // --- NEW CONFETTI SYSTEM ---
+    function fireConfetti(x, y) {
+        const colors = ['#ef4444', '#3b82f6', '#eab308', '#22c55e', '#a855f7', '#ffffff'];
+        const particleCount = 60;
+
+        for (let i = 0; i < particleCount; i++) {
+            const p = document.createElement('div');
+            p.className = 'confetti';
+            document.body.appendChild(p);
+
+            // Random physics
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 2 + Math.random() * 6;
+            const tx = Math.cos(angle) * velocity * 20; // Distance X
+            const ty = Math.sin(angle) * velocity * 20; // Distance Y
+            const rot = Math.random() * 720;
+
+            p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+
+            // Animate using Web Animations API for performance
+            const anim = p.animate([
+                { transform: `translate(0,0) rotate(0deg) scale(1)`, opacity: 1 },
+                { transform: `translate(${tx}px, ${ty}px) rotate(${rot}deg) scale(0.5)`, opacity: 0 }
+            ], {
+                duration: 800 + Math.random() * 400,
+                easing: 'cubic-bezier(0, .9, .57, 1)',
+            });
+
+            anim.onfinish = () => p.remove();
+        }
     }
 
     function collectReward() {
         sfx.click();
         state.pendingPokes = [];
         switchView('view-world');
+        // Add unlocks to map immediately
+        updateWorldMap();
+        renderNodes();
     }
 
     function endBattle() {
